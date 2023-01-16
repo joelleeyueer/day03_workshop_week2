@@ -1,8 +1,6 @@
 package sg.edu.nus.iss;
 
-import java.io.Console;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -51,7 +49,7 @@ public class App {
                     }
                     break;
                 case "users":
-                    //to do show users
+                    listUsers(dirPath);
                     break;
 
                 case "quit":
@@ -63,27 +61,9 @@ public class App {
                 default:
             }
 
-            String stringValue = "";
             if (incomingInput.startsWith("login")){
-                incomingInput = incomingInput.replace(',',' ');
-
-                Scanner scanner = new Scanner(incomingInput.substring(6));
-
-                while (scanner.hasNext()) {
-                    fileName = scanner.next();
-                }
-
-                File loginFile = new File(dirPath + File.separator + fileName);
-
-                boolean isCreated = loginFile.createNewFile();
-
-                if (isCreated) {
-                    displayMessage("File created successfully! Filename: " + loginFile.getCanonicalFile());
-                } else {
-                    displayMessage("File already created!");
-                }
+                createLoginFile(incomingInput);
             }
-
 
             if (incomingInput.startsWith("add")){
                 addToCart(shoppingCartItems, incomingInput);
@@ -93,6 +73,30 @@ public class App {
                 deleteFromCart(shoppingCartItems, incomingInput);
             }
 
+
+
+        }
+    }
+
+    private static void createLoginFile(String incomingInput) throws IOException {
+        String stringValue = "";
+
+        incomingInput = incomingInput.replace(',',' ');
+
+        Scanner scanner = new Scanner(incomingInput.substring(6));
+
+        while (scanner.hasNext()) {
+            fileName = scanner.next();
+        }
+
+        File loginFile = new File(dirPath + File.separator + fileName + ".txt");
+
+        boolean isCreated = loginFile.createNewFile();
+
+        if (isCreated) {
+            displayMessage("File created successfully! Filename: " + loginFile.getCanonicalFile());
+        } else {
+            displayMessage("File already created!");
         }
     }
 
@@ -117,17 +121,25 @@ public class App {
         listItems(shoppingCartItems);
     }
 
-    private static void addToCart(List<String> shoppingCartItems, String incomingInput) {
+    private static void addToCart(List<String> shoppingCartItems, String incomingInput) throws IOException {
         String stringValue;
         if(incomingInput.startsWith("add")){
             incomingInput = incomingInput.replace(',',' ');
 
             Scanner scanner = new Scanner(incomingInput.substring(4));
 
+            FileWriter fw = new FileWriter(dirPath + File.separator + fileName + ".txt");
+            PrintWriter pw = new PrintWriter(fw);
+
             while (scanner.hasNext()){
                 stringValue = scanner.next();
                 shoppingCartItems.add(stringValue);
+                pw.printf("%s\n", stringValue);
             }
+            pw.flush();
+            fw.flush();
+            pw.close();
+            fw.close();
         }
         listItems(shoppingCartItems);
     }
@@ -141,4 +153,17 @@ public class App {
             System.out.println(i+1 + ". " + shoppingCartItems.get(i));
         }
     }
+
+    public static void listUsers(String dirPath){
+        File directoryPath = new File(dirPath);
+
+        String contents[] = directoryPath.list();
+
+        displayMessage("Printing the list of users");
+        for (int i = 0; i < contents.length; i++){
+            displayMessage(i+1 + ". " + contents[i]);
+        }
+
+    }
+
 }
